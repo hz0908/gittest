@@ -2,6 +2,11 @@
 #define SDO_PREPARE
 #include "type.h"
 
+#define PROTONOSUPPORT 1
+#define OVERFLOW 2
+#define IO 3
+#define NOMEM 4
+
 enum
 {
     NC_SDO_ENTRY_ACCESS_PREOP,  // PREOP状态的access权力
@@ -109,7 +114,7 @@ nc_sdo_request_t *InitReq(nc_sdo_request_t *req, uint16 index, uint8 subindex,
 void nc_sdo_request_clear_data(nc_sdo_request_t *req);                                   // nc_sdo_request清空数据
 int nc_sdo_request_alloc(nc_sdo_request_t *, uint16);                                    // nc_sdo_request分配内存大小，输入requset和需要的存储区域大小
 int nc_sdo_request_copy_data(nc_sdo_request_t *, const uint8 *, uint16);                 // nc_sdo_request中加入数据，输入requset，原始数据和需要的存储区域大小
-uint8 nc_Txpdo_assign(uint16 *Txpdo_index, uint8 len, nc_slave_t *slave);                // 为一个或多个PDO对象分配一个或多个传输对象，并返回PDO数量
-uint8 nc_Rxpdo_assign(uint16 *Rxpdo_index, uint8 len, nc_slave_t *slave);                // 为一个或多个PDO对象分配一个或多个传输对象，并返回PDO数量
+// uint8 nc_Txpdo_assign(uint16 *Txpdo_index, uint8 len, nc_slave_t *slave);                // 为一个或多个PDO对象分配一个或多个传输对象，并返回PDO数量
+// uint8 nc_Rxpdo_assign(uint16 *Rxpdo_index, uint8 len, nc_slave_t *slave);                // 为一个或多个PDO对象分配一个或多个传输对象，并返回PDO数量
 
 #endif // SDO_PREPARE

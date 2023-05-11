@@ -48,7 +48,7 @@ int Sdo_Info_Get(nc_slave_t *slave)
             return 0;
         }
         // 已经发送完成
-        slave->dictsionary = CreateList(); // 创造主索引链表
+        slave->dictionary = CreateList(); // 创造主索引链表
         printf("Wait Get-OD-List response:\n");
         while (finished) // 循环接收所有的OD list(index)
         {
@@ -74,7 +74,8 @@ int Sdo_Info_Get(nc_slave_t *slave)
         return 0;
     }
     desc_func(slave, fsm); // 填充entry和name等信息
-    //    PrintList(slave->dictionary);
+    printf("Dictionary:\n");
+    PrintList(slave->dictionary); // 打印整个字典
     free(fsm);
     return 1;
 }
@@ -165,7 +166,7 @@ bool service_channel_request_by_ring_position(uint16 ring_position, uint16 size,
 
 该函数检查接收到的数据是否具有预期的大小和格式，然后提取索引并将其附加到从设备的OD列表中。
 最后，它检查是否还有更多的分片需要接收，并返回适当的代码。
-AppendList(slave->dictsionary,sdo_index,slave);获得的是index列表*/
+AppendList(slave->dictionary,sdo_index,slave);获得的是index列表*/
 int nc_fsm_coe_dict_response(
     nc_fsm_coe_t *fsm,
     uint8 *datagram) // return 2出现错误，return 1检查到后面还有分段，return 0无碍
@@ -231,7 +232,7 @@ int nc_fsm_coe_dict_response(
 
     sdo_count = (rec_size - 2 - index_list_offset) / 2; // index list中index的数量
 
-    // 将Get OD List Request中的index写入到slave->dictsionary中
+    // 将Get OD List Request中的index写入到slave->dictionary中
     for (i = 0; i < sdo_count; i++)
     {
         sdo_index = NC_READ_U16(data + index_list_offset + i * 2); // 拿出index
@@ -240,7 +241,7 @@ int nc_fsm_coe_dict_response(
             printf("Slave %d: SDO dictionary contains index 0x0000.\n", fsm->slave->ring_position);
             continue;
         }
-        AppendList(slave->dictsionary, sdo_index, slave); // 向dictionary字典中添加一个主索引节点 在循环添加前已经完成了字典链表的新建
+        AppendList(slave->dictionary, sdo_index, slave); // 向dictionary字典中添加一个主索引节点 在循环添加前已经完成了字典链表的新建
         printf("No.%d index:%#04x\n", fsm->segment_size + i + 1, sdo_index);
     }
 
@@ -359,7 +360,7 @@ void nc_canopen_abort_msg(
             // QString str = "Slave" + QString::number(slave->ring_position) + ":SDO abort message 0x" + QString::number(abort_msg->code) + ":" + abort_msg->message;
             // 使用 QMessageBox::warning() 方法弹出一个警告对话框，该对话框包含了一个标题（"Error"）和一个消息文本（str 变量中的字符串内容）。第一个参数为 NULL，表示对话框不依赖于任何父窗口。第二个参数为标题，表示对话框的标题。
             // QMessageBox::warning(NULL, "Error", str);
-            printf("Slave %d SDO aobrt message 0x %#x :%s", slave->ring_position, abort_msg->code, abort_msg->message);
+            printf("Slave %d: SDO aobrt message 0x %#x :%s", slave->ring_position, abort_msg->code, abort_msg->message);
             return;
         }
     }
@@ -374,12 +375,12 @@ void desc_func(nc_slave_t *slave, nc_fsm_coe_t *fsm)
     uint8 *datagram_res = (uint8 *)malloc(slave->basic_info->Service_res_channel_length * sizeof(uint8));
     memset(datagram_req, 0, slave->basic_info->Service_req_channel_length * sizeof(uint8));
     memset(datagram_res, 0, slave->basic_info->Service_res_channel_length * sizeof(uint8));
-    ListHead_t *l = slave->dictsionary;
+    ListHead_t *l = slave->dictionary;
     dnode *p = l->FirstNode; // 首个主索引节点（不填数据）
     int ret;
     int finished = 1;
     channel_status_t res_channel_flag = EMPTY;
-    for (int i = 0; i < slave->dictsionary->length; i++)
+    for (int i = 0; i < slave->dictionary->length; i++)
     {
         finished = 1;
         p = p->next;                                           // 首个主索引节点之后的节点（填写数据的首个主索引节点）
@@ -428,7 +429,7 @@ void desc_func(nc_slave_t *slave, nc_fsm_coe_t *fsm)
                 }
                 // 完成请求
             }
-            printf("Wait index No.%d %#x subindex %d Get-Entry-Description response:\n", i + 1, fsm->index,fsm->subindex);
+            printf("Wait index No.%d %#x subindex %d Get-Entry-Description response:\n", i + 1, fsm->index, fsm->subindex);
             finished = 1;
             while (finished)
             {
@@ -446,7 +447,7 @@ void desc_func(nc_slave_t *slave, nc_fsm_coe_t *fsm)
             }
         }
     }
-    printf("finished Get-Object-Description and Get-Entry-Description successful!\n");
+    printf("finished Get-Object-Description and Get-Entry-Description successful!\n\n");
 }
 
 /*5)GetObject Description Request
@@ -547,8 +548,9 @@ int nc_fsm_coe_dict_desc_response(
             return 2;
         }
         name_size = rec_size - 8;
-        fsm->sdo->name = (char *)realloc(fsm->sdo->name, (fsm->segment_size + name_size) * sizeof(char)); // name补全
+        fsm->sdo->name = (char *)realloc(fsm->sdo->name, (fsm->segment_size + name_size + 1) * sizeof(char)); // name补全
         memcpy(fsm->sdo->name + fsm->segment_size, data + 6, name_size);
+        fsm->sdo->name[fsm->segment_size + name_size] = 0;
     }
     else // 是first
     {
@@ -560,13 +562,14 @@ int nc_fsm_coe_dict_desc_response(
         fsm->sdo->confuguration = NC_READ_U8(data + 5);
         fsm->sdo->max_subindex = NC_READ_U8(data + 6);
         fsm->sdo->object_code = NC_READ_U8(data + 7);
-        name_size = rec_size - 12;                                   // 看一看Get Object Description Response中是否有对象名称Name
-        fsm->sdo->name = (char *)malloc((name_size) * sizeof(char)); // 赋给sdo的name
+        name_size = rec_size - 12;                                       // 看一看Get Object Description Response中是否有对象名称Name
+        fsm->sdo->name = (char *)malloc((name_size + 1) * sizeof(char)); // 赋给sdo的name
         if (name_size)
         {
             memcpy(fsm->sdo->name, data + 10, name_size);
+            fsm->sdo->name[name_size] = 0;
         }
-        // int flag = CompleteList(slave->dictsionary, sdo); // 更新当前节点信息 这段不需要
+        // int flag = CompleteList(slave->dictionary, sdo); // 更新当前节点信息 这段不需要
     }
 
     // 查看后面是否跟着分段
@@ -706,8 +709,9 @@ int nc_fsm_coe_dict_entry_response(
         }
 
         name_size = rec_size - 8;
-        fsm->sdo->entryhead->LastNode->pre->name = (char *)realloc(fsm->sdo->entryhead->LastNode->pre->name, (fsm->segment_size + name_size) * sizeof(char)); // name补全
+        fsm->sdo->entryhead->LastNode->pre->name = (char *)realloc(fsm->sdo->entryhead->LastNode->pre->name, (fsm->segment_size + name_size + 1) * sizeof(char)); // name补全
         memcpy(fsm->sdo->entryhead->LastNode->pre->name + fsm->segment_size, data + 6, name_size);
+        fsm->sdo->entryhead->LastNode->pre->name[fsm->segment_size + name_size] = 0;
     }
     else // 是first
     {
@@ -723,7 +727,7 @@ int nc_fsm_coe_dict_entry_response(
             printf("Slave %d: Failed to allocate entry!\n", slave->ring_position);
             return 2;
         }
-        nc_sdo_entry_init(entry, 0x01);
+        nc_sdo_entry_init(entry, fsm->subindex); // 子索引节点初始化
         entry->data_type = NC_READ_U16(data + 6);
         entry->bit_length = NC_READ_U16(data + 8);
         // read access rights
@@ -737,11 +741,11 @@ int nc_fsm_coe_dict_entry_response(
         entry->Rxpdo_mapping_flag = (word >> 6) & 0x0001;
         entry->Txpdo_mapping_flag = (word >> 7) & 0x0001;
         name_size = rec_size - 14;
-        entry->name = (char *)malloc((name_size) * sizeof(char));
+        entry->name = (char *)malloc((name_size + 1) * sizeof(char));
         if (name_size)
         {
             memcpy(entry->name, data + 12, name_size);
-            
+            entry->name[name_size] = 0;
         }
         AppendEntryList(fsm->sdo->entryhead, entry);
     }
@@ -912,7 +916,7 @@ int nc_fsm_coe_prepare_down_start(
     NC_WRITE_U16(datagram + 6, request->index);
     NC_WRITE_U8(datagram + 8, request->subindex);
     NC_WRITE_U8(datagram + 9, request->number);
-    NC_WRITE_U16(datagram + 10, request->data_size);
+    NC_WRITE_U16(datagram + 10, fsm->complete_size);
     memcpy(datagram + NC_CON_DOWN_REQ_PREPARE_SIZE + 2, request->data, request->data_size);
     fsm->offset = request->data_size;                         // fsm->offset意思是数据还需要发送的是data偏离点
     fsm->remaining = fsm->complete_size - request->data_size; // fsm->reamining意思是data还未发送的部分
@@ -1007,6 +1011,9 @@ int nc_fsm_coe_down_response(
         NC_READ_U8(data + 5) != request->number || // 0x0009	Number	Unsigned8	下载的子索引数量
         NC_READ_U16(data + 6) != request->data_size)
     { // subindex
+        // printf("%d %d %d %d %d %d %d %d %d %d", NC_READ_U8(data), NC_READ_U8(data + 1),
+        //        NC_READ_U16(data + 2), NC_READ_U8(data + 4), NC_READ_U8(data + 5),
+        //        NC_READ_U16(data + 6), request->index, request->subindex, request->number, request->data_size);
         printf("Slave %d: Invalid SDO download response! Please Retrying...\n", slave->ring_position);
         // check for CoE response again
         //        ec_slave_mbox_prepare_check(slave, datagram); // can not fail.
@@ -1097,6 +1104,15 @@ int nc_fsm_coe_down_seg_response(
     fsm->offset += fsm->segment_size;
     fsm->remaining -= fsm->segment_size;
 
+    if (NC_READ_U16(data + 2) != fsm->offset)
+    { // 检查已经接受的数据
+        // printf("%d %d", NC_READ_U16(data + 2), fsm->offset);
+        printf("Slave %d: Invalid SDO download response! Please Retrying...\n", slave->ring_position);
+        // check for CoE response again
+        //        ec_slave_mbox_prepare_check(slave, datagram); // can not fail.
+        return 2;
+    }
+
     if (fsm->remaining)
     { // more segments to download
         printf("download seg successful!\n");
@@ -1130,7 +1146,6 @@ void nc_fsm_coe_down_prepare_segment_request(
     nc_sdo_request_t *request = fsm->request; // request里面存着需要下一步需要发送的请求
     uint8 max_data_size = slave->basic_info->Service_req_channel_length - 6;
     uint8 last_segment; // 这是最后一个部分的标志位
-
     if (fsm->remaining > max_data_size)
     {
         fsm->segment_size = max_data_size;
@@ -1237,8 +1252,8 @@ int SDO_Upload(
 
             printf("Data:0x");
             for (i = 0; i < fsm->request->data_size; i++)
-                printf("%x", fsm->request->data[i]);
-            printf("\n");
+                printf("%02x", fsm->request->data[i]);
+            printf("\n%d", fsm->request->data_size);
 
             memcpy(data, fsm->request->data, fsm->request->data_size);
             printf("finished the Upload successful!\n");

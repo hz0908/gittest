@@ -2,6 +2,7 @@
 #include "datagram.h"
 #include <string.h>
 #include "format.h"
+#include "reverse_array.h"
 
 // 1.通道配置：站地址、通道起始物理地址，通道长度，控制字，通道号
 // 站地址寻址
@@ -177,6 +178,7 @@ bool proc_data_channel_fchrd(uint16 station_address, uint8 *data, uint16 len, ui
         return false;
 
     memcpy(data, frame.dgrambuff + 7, len);
+    print_data(data,len);
     return true;
 }
 
@@ -246,6 +248,7 @@ bool proc_data_channel_achrd(uint16 ring_position, uint8 *data, uint16 len, uint
         return false;
 
     memcpy(data, frame.dgrambuff + 7, len);
+    print_data(data,len);
     return true;
 }
 

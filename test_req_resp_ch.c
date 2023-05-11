@@ -24,12 +24,12 @@ char rev_card_name[] = "enp2s0";
 
 uint16 ring_position = 0x00;
 uint16 phy_addr = 0x0800;
-uint16 ch_len = 6;
+uint16 ch_len = 17;
 uint8 control = CH_CONTROL_I;
 uint16 ch_No = 0;
 uint16 offset = 0x00;
-uint16 len = 5;
-uint8 data[] = {0x21, 0x11, 0x36, 0x22, 0x33, 0x68};
+uint16 len = 17;
+uint8 data[] = {0x0c, 0x00, 1, 0, 2, 0, 1, 0x16, 1, 1, 2, 0, 0x88, 0x11, 0,0,0};
 
 // 测试程序
 int main()
@@ -38,70 +38,75 @@ int main()
     send_socketCreate(send_card_name);
     rev_socketCreate(rev_card_name);
 
-    // data数组倒置
-    reverse_array(data, len);
-
-        // 关闭通道0
+    // 关闭通道0
     service_req_channel_off_apwr(ring_position);
+    // 关闭通道1
+    service_resp_channel_off_apwr(ring_position);
 
-    // 通道0配置
+    // 1// 通道0配置
     service_req_channel_config_apwr(ring_position, phy_addr, ch_len, control);
 
     // 打开通道0
     service_req_channel_on_apwr(ring_position);
 
-     // 查看通道0信息
-    channel_view(ring_position, ch_No);
-
-    // 写通道0 5Bytes
-    
-    service_req_channel_achwr(ring_position, (uint8 *)&data, len, offset);
     // 查看通道0信息
     channel_view(ring_position, ch_No);
 
-  // 写通道0 di6Bytes
-  uint16 offset = 0x05;
-uint16 len = 1;
-    service_req_channel_achwr(ring_position, (uint8 *)&data, len, offset);
+    // 写通道0 6Bytes
+
+    service_req_channel_achwr(ring_position, data, len, offset);
+
     // 查看通道0信息
     channel_view(ring_position, ch_No);
 
+    // phy_addr = 0x0810;
 
-    
-    // // 一键配置通道0
-    // service_req_channel_config_oneclick(ring_position);
-
-    // // 查看通道0信息
-    // channel_view(ring_position, ch_No);
-
-    // // 写通道0 测试
-    // service_req_channel_achwr(ring_position, (uint8 *)&data, len, offset);
-
-    // // 查看通道0信息
-    // channel_view(ring_position, ch_No);
-
-
-    // // 查看通道0信息
-    // channel_view(ring_position, ch_No);
-
-    // // 通道1配置
+    // // 4// 通道1配置
     // service_resp_channel_config_apwr(ring_position, phy_addr, ch_len, control);
 
     // // 打开通道1
     // service_resp_channel_on_apwr(ring_position);
 
+    // // 查看通道1信息
+    // channel_view(ring_position, 1);
 
+    // // 查看通道1信息
+    // channel_view(ring_position, 0);
+    // // 查看通道1信息
+    // channel_view(ring_position, 1);
 
-    // // 一键配置通道0
-    // service_resp_channel_config_oneclick(ring_position);
+    // // 写通道0 第6Bytes
+    // offset = 0x05;
+    //  len = 1;
+    // service_req_channel_achwr(ring_position, (uint8 *)&data, len, offset);
 
-    //         // 查看通道0信息
+    // // 查看通道0信息
     // channel_view(ring_position, ch_No);
 
-    // // 读通道1 测试
+    // //2// 查看通道0信息
+    // channel_view(ring_position, ch_No);
+
+    ////3// 一键配置通道0
+    // service_req_channel_config_oneclick(ring_position);
+
+    // //4// 通道1配置
+    // service_resp_channel_config_apwr(ring_position, phy_addr, ch_len, control);
+
+    // // 打开通道1
+    // service_resp_channel_on_apwr(ring_position);
+
+    //         // 查看通道1信息
+    // channel_view(ring_position, ch_No);
+
+    //         //5// 查看通道1信息
+    // channel_view(ring_position, ch_No);
+
+    // // 6//读通道1
     // service_resp_channel_achrd(ring_position, data, len, offset);
     //       // 查看通道0信息
     // channel_view(ring_position, ch_No);
+    // // 一键配置通道0
+    // service_resp_channel_config_oneclick(ring_position);
 
     // 套接字关闭
     send_rev_socketClose();

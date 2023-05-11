@@ -1,3 +1,4 @@
+#include <string.h>
 #include "format.h"
 #include "register.h"
 #include "datagram.h"
@@ -219,15 +220,12 @@ uint8 *nc_slave_aprd_all(uint16 ring_position, uint16 offset,
 
     irq = nctohs(*(uint16 *)(frame.dgrambuff + 7 + len));
 
-    for (size_t i = 0; i < len; i++)
-    {
-        *(data + i) = *(frame.dgrambuff + 7 + i);
-    }
+    memcpy(data, frame.dgrambuff + 7, len);
 
     if ((irq & 0x03) != 0x01)
     {
         *valid = false;
-         return 0;
+        return 0;
     }
     *valid = true;
     return data;

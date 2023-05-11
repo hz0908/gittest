@@ -54,7 +54,7 @@ struct ch_config_inf channel_view(uint16 ring_position, uint8 ch_No)
     switch (cci.ch_interrrupt_switch & 0b11)
     {
     case 0:
-        printf("M中断未允许,S中断未允许\t");
+        printf("M中断未允许,S中断未允许\n");
         break;
     case 1:
         printf("M中断允许,S中断未允许\n");

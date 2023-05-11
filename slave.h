@@ -2,7 +2,7 @@
 #define SLAVE
 
 #include "type.h"
-
+#include "sdo_prepare.h"
 
 typedef enum{
     NC_DIR_INVALID,
@@ -58,9 +58,8 @@ struct pdo_entries{
     uint8  index_length;//子索引对对象的长度？单个的长度，用来做中间变量
     uint16 *pdo_index;//pdo通道对应的映射对象的主索引数组 如 [6040 6041 6002]
     uint8  *pdo_subindex;//pdo通道对应的映射对象的子索引数组头,如 [1 1 1]
-    
 	char * name;//主索引名称？entry->name = slave->strings[string_ID-16];从站指定的一个名称
-    uint8 * pdo_data_length;//对应于每个pdo数据的字节长度
+    uint16 * pdo_data_offset;////每个pdodata在自己所在的pdo-entry中的偏移量
     void ** pdo_data;//pdo数据的一个快速映射索引
 };
 
@@ -94,6 +93,16 @@ struct pdo_channel{
     uint8 * pdo_channel_data;//用以存放过程数据通道的
 };
 
+
+typedef struct nc_domain nc_domain_t;
+struct nc_domain{
+    uint8*  data_domain;   //存放pdo的数据区
+    uint16  pdo_data_count;
+    uint16* pdo_index;//pdo通道对应的映射对象的主索引数组 如 [6040 6041 6002]
+    uint8*  pdo_subindex;//pdo通道对应的映射对象的子索引数组头,如 [1 1 1]
+    uint16* domain_offset;//主索引子索引所对应的在domain中的偏移量
+};
+
 struct nc_slave{
     nc_master_t *master;//所属的主站
     uint16 ring_position;//顺序地址
@@ -113,8 +122,10 @@ struct nc_slave{
     uint8 service_channel_count;//使用的服务通道的数量,是通过从站信息
     pdo_channel_t * pdo_channel_list;//pdo通道的信息 数组
 
+    nc_domain_t slave_domain; 
+
     //CON SDO
-    struct ListHead * dictsionary;//从站的对象字典
+    struct ListHead * dictionary;//从站的对象字典
 
 };
 

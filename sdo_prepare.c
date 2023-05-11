@@ -4,7 +4,6 @@
 #include "type.h"
 #include "format.h"
 #include "slave.h"
-#include "sdo.h"
 #include "sdo_prepare.h"
 // 创造主索引链表
 ListHead_t *CreateList()
@@ -174,7 +173,7 @@ void PrintList(ListHead_t *l)
     while (i < l->length)
     {
         p = p->next;
-        printf("index:%#x\n object_code:%#x max_subindex:%d name:%s\n", p->index, p->object_code, p->max_subindex, p->name);
+        printf("index:%#x\n\tobject_code:%#x max_subindex:%d name:%s\n", p->index, p->object_code, p->max_subindex, p->name);
         PrintEntryList(p->entryhead);
         ++i;
     }
@@ -194,7 +193,7 @@ void PrintEntryList(EntryListHead_t *l)
     while (i < l->length)
     {
         p = p->next;
-        printf("subindex:%d data_type:%#x bit_length:%d\n", p->subindex, p->data_type, p->bit_length);
+        printf("\tsubindex:%d data_type:%#x bit_length:%d name:%s\n", p->subindex, p->data_type, p->bit_length, p->name);
         ++i;
     }
 }
@@ -254,30 +253,30 @@ int nc_sdo_request_copy_data(nc_sdo_request_t *req, const uint8 *source, uint16 
     return 0;
 }
 
-uint8 nc_Txpdo_assign(uint16 *Txpdo_index, uint8 len, nc_slave_t *slave)
-{
-    int i, ret;
-    uint8 *data = (uint8 *)malloc(2 * (len + 1) * sizeof(uint8));
-    NC_WRITE_U16(data, len);
-    for (i = 0; i < len; i++)
-    {
-        NC_WRITE_U16(data + 2 * (i + 1), Txpdo_index[i]);
-    }
-    ret = SDO_Download(slave, data, 0x1C13, 0, 1, (len + 1) * 2); // 1c13与ncuc寄存器文档的59页有关
-    free(data);
-    return len;
-}
+// uint8 nc_Txpdo_assign(uint16 *Txpdo_index, uint8 len, nc_slave_t *slave)
+// {
+//     int i, ret;
+//     uint8 *data = (uint8 *)malloc(2 * (len + 1) * sizeof(uint8));
+//     NC_WRITE_U16(data, len);
+//     for (i = 0; i < len; i++)
+//     {
+//         NC_WRITE_U16(data + 2 * (i + 1), Txpdo_index[i]);
+//     }
+//     ret = SDO_Download(slave, data, 0x1C13, 0, 1, (len + 1) * 2); // 1c13与ncuc寄存器文档的59页有关
+//     free(data);
+//     return len;
+// }
 
-uint8 nc_Rxpdo_assign(uint16 *Rxpdo_index, uint8 len, nc_slave_t *slave)
-{
-    int i, ret;
-    uint8 *data = (uint8 *)malloc(2 * (len + 1) * sizeof(uint8));
-    NC_WRITE_U16(data, len);
-    for (i = 0; i < len; i++)
-    {
-        NC_WRITE_U16(data + 2 * (i + 1), Rxpdo_index[i]);
-    }
-    ret = SDO_Download(slave, data, 0x1C12, 0, 1, (len + 1) * 2);
-    free(data);
-    return len;
-}
+// uint8 nc_Rxpdo_assign(uint16 *Rxpdo_index, uint8 len, nc_slave_t *slave)
+// {
+//     int i, ret;
+//     uint8 *data = (uint8 *)malloc(2 * (len + 1) * sizeof(uint8));
+//     NC_WRITE_U16(data, len);
+//     for (i = 0; i < len; i++)
+//     {
+//         NC_WRITE_U16(data + 2 * (i + 1), Rxpdo_index[i]);
+//     }
+//     ret = SDO_Download(slave, data, 0x1C12, 0, 1, (len + 1) * 2);
+//     free(data);
+//     return len;
+// }

@@ -104,7 +104,7 @@ int16 chAccessdgrmAdd(nc_frame_t *targetFrame,uint8 cmd,uint16 st,\
     *(uint16*)(targetFrame->currentdataptr) = htoncs(irq);   /**irq**/
     targetFrame->currentdataptr += sizeof(irq);
 
-    return (targetFrame->lastcmd - targetFrame->dgrambuff)/sizeof(uint8);
+    return (targetFrame->lastcmd - targetFrame->dgrambuff)/sizeof(uint8);//长度
 }
 
 int16 chMapdgrmAdd(nc_frame_t *targetFrame,uint8 cmd,uint16 mapNo,uint16 datalen,\

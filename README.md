@@ -9,13 +9,6 @@ gcc socket_test.c datagram.c format.c frame.c bufferSendrecv.c register.c -o soc
 只要使用了寄存器读写函数，或者根本上讲是使用了报文收发函数，都需要按照socket_test.c示例的样子创建套接字，最终关闭套接字等
 
 register_operation_test.c中是关于寄存器读写的测试
-gcc register_operation_test.c datagram.c format.c frame.c bufferSendrecv.c register.c -o hh
-
-通道映射配置：
-gcc bufferSendrecv.c datagram.c format.c frame.c mapping_config_test.c mapping_config.c register.c -o mapping_config_test
-
-通道映射访问：
-gcc bufferSendrecv.c datagram.c format.c frame.c mapping_config.c mapping_visit.c mapping_visit_test.c process_data_channel.c register.c reverse_array.c service_data_channel.c service_req_resp_channel.c -o mapping_visit_test
 
 过程数据通道访问：
 gcc bufferSendrecv.c channel_operation_test.c datagram.c format.c frame.c process_data_channel.c register.c reverse_array.c  -o ch
@@ -23,3 +16,5 @@ gcc bufferSendrecv.c channel_operation_test.c datagram.c format.c frame.c proces
 服务请求应答通道访问：
 gcc bufferSendrecv.c  channel_view.c datagram.c format.c frame.c register.c reverse_array.c service_req_resp_channel.c test_req_resp_ch.c  -o ch
 
+通道映射：
+gcc bufferSendrecv.c datagram.c format.c frame.c mapping_config_test.c mapping.c register.c -o mapping_config_test

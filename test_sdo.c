@@ -63,31 +63,31 @@ int main()
     // // SDO Download test
     // nc_slave_t *slave = (nc_slave_t *)malloc(sizeof(nc_slave_t));
     // slave_basic_info_t *basic_info = (slave_basic_info_t *)malloc(sizeof(slave_basic_info_t));
-    // basic_info->Service_req_channel_length = 0x11;
-    // basic_info->Service_res_channel_length = 0x11;
+    // basic_info->Service_req_channel_length = ch_len0;
+    // basic_info->Service_res_channel_length = ch_len1;
     // basic_info->Channel_Protocol = 01;
     // slave->basic_info = basic_info;
     // slave->ring_position = 0;
     // uint8 data[] = {0x88, 0x11, 0x22, 0x59,0x89, 0x11, 0x22, 0x59};
-    // uint16 index = 0x1601;
+    // uint16 index = 0x1a00;
     // uint8 subindex = 1;
     // uint8 number = 1;
-    // uint8 length = 2;
+    // uint8 length = 4;
     // SDO_Download(slave, data, index, subindex, number, length);
 
     // // SDO Upload test
     // nc_slave_t *slave = (nc_slave_t *)malloc(sizeof(nc_slave_t));
     // slave_basic_info_t *basic_info = (slave_basic_info_t *)malloc(sizeof(slave_basic_info_t));
-    // basic_info->Service_req_channel_length = 0x10;
-    // basic_info->Service_res_channel_length = 0x10;
+    // basic_info->Service_req_channel_length = ch_len0;
+    // basic_info->Service_res_channel_length = ch_len1;
     // basic_info->Channel_Protocol = 01;
     // slave->basic_info = basic_info;
     // slave->ring_position = 0;
-    // uint8 length = 8;
-    // uint8 *data = (uint8 *)malloc(length);
-    // uint16 index = 0x1601;
+    // uint8 length = 4;
+    // uint8 *data = (uint8 *)malloc(length*sizeof(uint8));
+    // uint16 index = 0x1a00;
     // uint8 subindex = 1;
-    // uint8 number = 2;
+    // uint8 number = 1;
     // SDO_Upload(slave, data, index, subindex, number);
     // // //打印data
     // // printf("data:0x");
@@ -97,14 +97,14 @@ int main()
 
     // SDO information test
     nc_slave_t *slave = (nc_slave_t *)malloc(sizeof(nc_slave_t));
-    ListHead_t *dictsionary = (ListHead_t *)malloc(sizeof(ListHead_t));
+    ListHead_t *dictionary = (ListHead_t *)malloc(sizeof(ListHead_t));
     slave_basic_info_t *basic_info = (slave_basic_info_t *)malloc(sizeof(slave_basic_info_t));
     basic_info->Service_req_channel_length = ch_len0;
     basic_info->Service_res_channel_length = ch_len1;
     basic_info->Channel_Protocol = 01;
     slave->basic_info = basic_info;
     slave->ring_position = 0;
-    slave->dictsionary = dictsionary;
+    slave->dictionary = dictionary;
     Sdo_Info_Get(slave);
 
     // 套接字关闭

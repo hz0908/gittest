@@ -18,7 +18,6 @@ uint16 datalen=0x04;
 uint8 data=0x12;
 uint16 irq=0;
 bool valid=true;
-uint8 dataram[6];
 
 
 // 测试程序
@@ -42,29 +41,16 @@ initframe(&frm);
 
 
 //寄存器读写函数测试，函数封装了报文生成、发送与接受并简单解析的工作
-uint8 re_data1=nc_slave_aprd_uint8(1,addr,&valid);
+uint8 re_data1=nc_slave_aprd_uint8(st,addr,&valid);
 printf("data1:%2x\n",re_data1);
 //读固定值寄存器的值
 
-uint8 wr_data2=nc_slave_apwr_uint8(2,0x60,data,&valid);
+uint8 wr_data2=nc_slave_apwr_uint8(st,0x60,data,&valid);
 printf("data2:%2x\n",wr_data2);
 
 uint8 re_data3=nc_slave_aprd_uint8(st,0x60,&valid);
 
 printf("data3:%2x\n",re_data3);
-
-
-nc_slave_aprd_6byte(1,0x0000,dataram,&valid);
-if (!valid)
-{
-   printf("error\n");
-}
-for (size_t i = 0; i < 6; i++)
-{
-    printf("data%x :%x \n",i,dataram[i]);
-}
-
-
 
 //套接字关闭
 send_rev_socketClose();

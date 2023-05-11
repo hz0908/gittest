@@ -58,7 +58,7 @@ bool pdo_mapping_config_by_ring_position(uint16 ring_position,mapping_config_t* 
             return false;
         
         //Mapping通道内地址配置
-        nc_slave_apwr_uint16(ring_position, 0x0286 + (mapping0_proc->mapping_count)*8, mapping0_proc->data_start_address, &flag);
+        nc_slave_apwr_uint16(ring_position, 0x0286 + (mapping0_proc->mapping_count)*8, 0x0000, &flag);
         if(!flag)
            return false;
  }

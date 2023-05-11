@@ -369,12 +369,12 @@ bool service_resp_channel_achrd(uint16 ring_position, uint8 *data, uint16 len, u
     if (FrameReceive(&frame) < 0)
         return false;
 
-    irq = nctohs(*(uint16 *)(frame.dgrambuff + 7 + len));
+    irq = nctohs(*(uint16 *)(frame.dgrambuff + result + 7 + len));
     if ((irq & 0x03) != 0x01)
         return false;
 
-    memcpy(data, frame.dgrambuff + 7, len);
-    print_data(data, len);
+    memcpy(data, frame.dgrambuff + result + 7, len);
+    //print_data(data, len);
     return true;
 }
 
@@ -404,7 +404,7 @@ bool service_channel_respond_by_ring_position(uint16 ring_position, uint16 len_c
     uint8 ByteArray[len_ch];
     initframe(&frame);
 
-    result = chAccessdgrmAdd(&frame, ACHRD, ring_position, 0x00, len_ch, SVR_RESP_CH, ByteArray,0);
+    result = chAccessdgrmAdd(&frame, ACHRD, ring_position, 0x00, len_ch, SVR_RESP_CH, ByteArray, 0);//获取result
 
     if (result < 0)
         return false;
@@ -432,24 +432,24 @@ bool service_channel_respond_by_ring_position(uint16 ring_position, uint16 len_c
     NC_WRITE_U8 (datagram + 4, 0x01);
     NC_WRITE_U8 (datagram + 5, 0x01);
     NC_WRITE_U16(datagram + 6, 0x01);// deliver all SDOs!*/
-//获取服务应答通道的数据
+// 获取服务应答通道的数据
 uint8 *nc_slave_res_channel_fetch(const nc_slave_t *slave, /**< slave */
-                              uint8 *datagram, /**< datagram */
-                             uint8 *type, /**< expected mailbox protocol */
-                             uint16 *size /**< size of the received data */
-                             )
+                                  uint8 *datagram,         /**< datagram */
+                                  uint8 *type,             /**< expected mailbox protocol */
+                                  uint16 *size             /**< size of the received data */
+)
 {
     uint16 data_size;
 
     data_size = NC_READ_U16(datagram);
 
- /*   if (data_size + EC_MBOX_HEADER_SIZE > slave->configured_tx_mailbox_size) {
-        EC_SLAVE_ERR(slave, "Corrupt mailbox response received!\n");
-        ec_print_data(datagram->Data, slave->configured_tx_mailbox_size);
-        return ERR_PTR(-EPROTO);
-    } */
+    /*   if (data_size + EC_MBOX_HEADER_SIZE > slave->configured_tx_mailbox_size) {
+           EC_SLAVE_ERR(slave, "Corrupt mailbox response received!\n");
+           ec_print_data(datagram->Data, slave->configured_tx_mailbox_size);
+           return ERR_PTR(-EPROTO);
+       } */
 
     *type = NC_READ_U8(datagram + 2);
     *size = data_size;
-    return datagram+4;
+    return datagram + 4;
 }

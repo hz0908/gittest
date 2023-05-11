@@ -1,12 +1,6 @@
 #ifndef SDO
 #define SDO
 #include "type.h"
-#include "sdo_prepare.h"
-
-#define PROTONOSUPPORT 1
-#define OVERFLOW 2
-#define IO 3
-#define NOMEM 4
 
 // 终止代码和描述
 struct nc_code_msg

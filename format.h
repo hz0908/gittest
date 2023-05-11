@@ -17,7 +17,7 @@
 #define NC_READ_S16(DATA) \
      ((int16) le16_to_cpup((void *) (DATA)))
 
-#define NC_READ_U32(DATA) \
+#define                NC_READ_U32(DATA) \
      ((uint32) le32_to_cpup((void *) (DATA)))
 
 #define NC_READ_S32(DATA) \
